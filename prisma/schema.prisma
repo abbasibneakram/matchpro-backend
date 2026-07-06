@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Module 1 (Auth) only for now — more models arrive with each later module.
+model Matchmaker {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  profiles     Profile[]
+}
+
+model Profile {
+  id           String        @id @default(cuid())
+  matchmaker   Matchmaker    @relation(fields: [matchmakerId], references: [id])
+  matchmakerId String
+
+  status       ProfileStatus @default(PENDING_REVIEW)
+  gender       Gender
+  name         String
+  age          Int
+  education    String?
+  profession   String?
+  city         String?
+  religion     String?
+  sect         String?
+  caste        String?
+  familyDetails String?
+  rawPastedText String?      // populated by Module 3 (AI extraction); unused for now
+
+  // what this profile is looking for — used by the Module 6 matching engine
+  prefAgeMin    Int?
+  prefAgeMax    Int?
+  prefEducation String?
+  prefCity      String?
+  prefReligion  String?
+  prefSect      String?
+  prefCaste     String?
+
+  feeAgreed    Decimal? @default(0)
+  amountPaid   Decimal? @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ProfileStatus {
+  PENDING_REVIEW
+  ACTIVE
+  INACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
