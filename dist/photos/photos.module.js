@@ -6,17 +6,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProfilesModule = void 0;
+exports.PhotosModule = void 0;
 const common_1 = require("@nestjs/common");
-const profiles_controller_1 = require("./profiles.controller");
-const profiles_service_1 = require("./profiles.service");
-let ProfilesModule = class ProfilesModule {
+const profiles_module_1 = require("../profiles/profiles.module");
+const photos_controller_1 = require("./photos.controller");
+const photos_service_1 = require("./photos.service");
+const storage_provider_1 = require("./storage.provider");
+let PhotosModule = class PhotosModule {
 };
-exports.ProfilesModule = ProfilesModule;
-exports.ProfilesModule = ProfilesModule = __decorate([
+exports.PhotosModule = PhotosModule;
+exports.PhotosModule = PhotosModule = __decorate([
     (0, common_1.Module)({
-        controllers: [profiles_controller_1.ProfilesController],
-        providers: [profiles_service_1.ProfilesService],
-        exports: [profiles_service_1.ProfilesService],
+        imports: [profiles_module_1.ProfilesModule], // for the exported ProfilesService ownership check
+        controllers: [photos_controller_1.PhotosController],
+        providers: [photos_service_1.PhotosService, storage_provider_1.StorageProvider],
     })
-], ProfilesModule);
+], PhotosModule);

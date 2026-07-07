@@ -12,6 +12,10 @@ const config_1 = require("@nestjs/config");
 const prisma_module_1 = require("./prisma/prisma.module");
 const auth_module_1 = require("./auth/auth.module");
 const profiles_module_1 = require("./profiles/profiles.module");
+const ai_extraction_module_1 = require("./ai-extraction/ai-extraction.module");
+const invites_module_1 = require("./invites/invites.module");
+const photos_module_1 = require("./photos/photos.module");
+const matching_module_1 = require("./matching/matching.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -22,8 +26,10 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
             profiles_module_1.ProfilesModule,
-            // AiExtractionModule, MatchingModule, PhotosModule
-            // get added here as each later module is built.
+            ai_extraction_module_1.AiExtractionModule,
+            invites_module_1.InvitesModule,
+            photos_module_1.PhotosModule,
+            matching_module_1.MatchingModule,
         ],
     })
 ], AppModule);

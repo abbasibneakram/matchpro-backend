@@ -9,13 +9,14 @@ datasource db {
 
 // Module 1 (Auth) only for now — more models arrive with each later module.
 model Matchmaker {
-  id           String   @id @default(cuid())
+  id           String          @id @default(cuid())
   name         String
-  email        String   @unique
+  email        String          @unique
   phone        String?
   passwordHash String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime        @default(now())
   profiles     Profile[]
+  invites      ProfileInvite[]
 }
 
 model Profile {
@@ -48,8 +49,26 @@ model Profile {
   feeAgreed    Decimal? @default(0)
   amountPaid   Decimal? @default(0)
 
+  photos    Photo[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Photo {
+  id         String   @id @default(cuid())
+  profile    Profile  @relation(fields: [profileId], references: [id])
+  profileId  String
+  storageKey String   // key in object storage — never a public URL, never stored on the row directly
+  createdAt  DateTime @default(now())
+}
+
+model ProfileInvite {
+  id           String     @id @default(cuid())
+  token        String     @unique
+  matchmaker   Matchmaker @relation(fields: [matchmakerId], references: [id])
+  matchmakerId String
+  used         Boolean    @default(false)
+  createdAt    DateTime   @default(now())
 }
 
 enum ProfileStatus {

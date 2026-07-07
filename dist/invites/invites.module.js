@@ -6,17 +6,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProfilesModule = void 0;
+exports.InvitesModule = void 0;
 const common_1 = require("@nestjs/common");
-const profiles_controller_1 = require("./profiles.controller");
-const profiles_service_1 = require("./profiles.service");
-let ProfilesModule = class ProfilesModule {
+const invites_controller_1 = require("./invites.controller");
+const public_invite_controller_1 = require("./public-invite.controller");
+const invites_service_1 = require("./invites.service");
+let InvitesModule = class InvitesModule {
 };
-exports.ProfilesModule = ProfilesModule;
-exports.ProfilesModule = ProfilesModule = __decorate([
+exports.InvitesModule = InvitesModule;
+exports.InvitesModule = InvitesModule = __decorate([
     (0, common_1.Module)({
-        controllers: [profiles_controller_1.ProfilesController],
-        providers: [profiles_service_1.ProfilesService],
-        exports: [profiles_service_1.ProfilesService],
+        controllers: [invites_controller_1.InvitesController, public_invite_controller_1.PublicInviteController],
+        providers: [invites_service_1.InvitesService],
     })
-], ProfilesModule);
+], InvitesModule);

@@ -6,17 +6,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProfilesModule = void 0;
+exports.AiExtractionModule = void 0;
 const common_1 = require("@nestjs/common");
-const profiles_controller_1 = require("./profiles.controller");
-const profiles_service_1 = require("./profiles.service");
-let ProfilesModule = class ProfilesModule {
+const ai_extraction_controller_1 = require("./ai-extraction.controller");
+const ai_extraction_service_1 = require("./ai-extraction.service");
+const groq_provider_1 = require("./providers/groq.provider");
+let AiExtractionModule = class AiExtractionModule {
 };
-exports.ProfilesModule = ProfilesModule;
-exports.ProfilesModule = ProfilesModule = __decorate([
+exports.AiExtractionModule = AiExtractionModule;
+exports.AiExtractionModule = AiExtractionModule = __decorate([
     (0, common_1.Module)({
-        controllers: [profiles_controller_1.ProfilesController],
-        providers: [profiles_service_1.ProfilesService],
-        exports: [profiles_service_1.ProfilesService],
+        controllers: [ai_extraction_controller_1.AiExtractionController],
+        providers: [ai_extraction_service_1.AiExtractionService, groq_provider_1.GroqProvider],
     })
-], ProfilesModule);
+], AiExtractionModule);
