@@ -7,6 +7,7 @@ import { AiExtractionModule } from './ai-extraction/ai-extraction.module';
 import { InvitesModule } from './invites/invites.module';
 import { PhotosModule } from './photos/photos.module';
 import { MatchingModule } from './matching/matching.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { MatchingModule } from './matching/matching.module';
     AiExtractionModule,
     InvitesModule,
     PhotosModule,
-    MatchingModule,
+    MatchingModule
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
