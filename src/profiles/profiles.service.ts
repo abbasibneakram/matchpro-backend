@@ -1,7 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
 
 @Injectable()
 export class ProfilesService {
@@ -34,5 +35,21 @@ export class ProfilesService {
   async update(matchmakerId: string, id: string, dto: UpdateProfileDto) {
     await this.findOne(matchmakerId, id); // throws if not owned
     return this.prisma.profile.update({ where: { id }, data: dto });
+  }
+
+  async updatePayment(matchmakerId: string, id: string, dto: UpdatePaymentDto) {
+    const profile = await this.findOne(matchmakerId, id); // throws if not owned
+
+    const feeAgreed = dto.feeAgreed ?? Number(profile.feeAgreed ?? 0);
+    const amountPaid = dto.amountPaid ?? Number(profile.amountPaid ?? 0);
+
+    if (amountPaid > feeAgreed) {
+      throw new BadRequestException('Amount paid cannot exceed the fee agreed');
+    }
+
+    return this.prisma.profile.update({
+      where: { id },
+      data: { feeAgreed, amountPaid },
+    });
   }
 }

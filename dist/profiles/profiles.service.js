@@ -42,6 +42,18 @@ let ProfilesService = class ProfilesService {
         await this.findOne(matchmakerId, id); // throws if not owned
         return this.prisma.profile.update({ where: { id }, data: dto });
     }
+    async updatePayment(matchmakerId, id, dto) {
+        const profile = await this.findOne(matchmakerId, id); // throws if not owned
+        const feeAgreed = dto.feeAgreed ?? Number(profile.feeAgreed ?? 0);
+        const amountPaid = dto.amountPaid ?? Number(profile.amountPaid ?? 0);
+        if (amountPaid > feeAgreed) {
+            throw new common_1.BadRequestException('Amount paid cannot exceed the fee agreed');
+        }
+        return this.prisma.profile.update({
+            where: { id },
+            data: { feeAgreed, amountPaid },
+        });
+    }
 };
 exports.ProfilesService = ProfilesService;
 exports.ProfilesService = ProfilesService = __decorate([

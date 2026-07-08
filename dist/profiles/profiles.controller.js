@@ -19,6 +19,7 @@ const current_matchmaker_decorator_1 = require("../common/decorators/current-mat
 const profiles_service_1 = require("./profiles.service");
 const create_profile_dto_1 = require("./dto/create-profile.dto");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
+const update_payment_dto_1 = require("./dto/update-payment.dto");
 let ProfilesController = class ProfilesController {
     constructor(profilesService) {
         this.profilesService = profilesService;
@@ -34,6 +35,9 @@ let ProfilesController = class ProfilesController {
     }
     update(mm, id, dto) {
         return this.profilesService.update(mm.id, id, dto);
+    }
+    updatePayment(mm, id, dto) {
+        return this.profilesService.updatePayment(mm.id, id, dto);
     }
 };
 exports.ProfilesController = ProfilesController;
@@ -70,6 +74,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, update_profile_dto_1.UpdateProfileDto]),
     __metadata("design:returntype", void 0)
 ], ProfilesController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)(':id/payment'),
+    __param(0, (0, current_matchmaker_decorator_1.CurrentMatchmaker)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, update_payment_dto_1.UpdatePaymentDto]),
+    __metadata("design:returntype", void 0)
+], ProfilesController.prototype, "updatePayment", null);
 exports.ProfilesController = ProfilesController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('profiles'),

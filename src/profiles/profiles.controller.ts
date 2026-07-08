@@ -6,6 +6,7 @@ import { CurrentMatchmaker } from '../common/decorators/current-matchmaker.decor
 import { ProfilesService } from './profiles.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('profiles')
@@ -34,5 +35,14 @@ export class ProfilesController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.profilesService.update(mm.id, id, dto);
+  }
+
+  @Patch(':id/payment')
+  updatePayment(
+    @CurrentMatchmaker() mm: { id: string },
+    @Param('id') id: string,
+    @Body() dto: UpdatePaymentDto,
+  ) {
+    return this.profilesService.updatePayment(mm.id, id, dto);
   }
 }
