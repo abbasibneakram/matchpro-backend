@@ -10,6 +10,7 @@ exports.MatchingModule = void 0;
 const common_1 = require("@nestjs/common");
 const profiles_module_1 = require("../profiles/profiles.module");
 const matching_controller_1 = require("./matching.controller");
+const matches_controller_1 = require("./matches.controller");
 const matching_service_1 = require("./matching.service");
 let MatchingModule = class MatchingModule {
 };
@@ -17,7 +18,7 @@ exports.MatchingModule = MatchingModule;
 exports.MatchingModule = MatchingModule = __decorate([
     (0, common_1.Module)({
         imports: [profiles_module_1.ProfilesModule], // for the exported ProfilesService ownership check
-        controllers: [matching_controller_1.MatchingController],
+        controllers: [matching_controller_1.MatchingController, matches_controller_1.MatchesController],
         providers: [matching_service_1.MatchingService],
     })
 ], MatchingModule);

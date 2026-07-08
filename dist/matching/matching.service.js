@@ -32,11 +32,70 @@ let MatchingService = class MatchingService {
                 id: { not: source.id },
             },
         });
+        // Pull any matches already acted on for this source profile, so the
+        // list can show "already shared / Interested" instead of recomputing
+        // from scratch every time and losing that state.
+        const existing = await this.prisma.match.findMany({
+            where: { sourceProfileId: profileId, targetProfileId: { in: candidates.map((c) => c.id) } },
+        });
+        const existingByTarget = new Map(existing.map((m) => [m.targetProfileId, m]));
         return candidates
-            .map((candidate) => ({ profile: candidate, score: this.score(source, candidate) }))
-            .filter((match) => match.score > 0)
+            .map((candidate) => {
+            const match = existingByTarget.get(candidate.id);
+            return {
+                profile: candidate,
+                score: this.score(source, candidate),
+                matchId: match?.id ?? null,
+                status: match?.status ?? null,
+                sharedAt: match?.sharedAt ?? null,
+            };
+        })
+            .filter((m) => m.score > 0)
             .sort((a, b) => b.score - a.score)
             .slice(0, MAX_RESULTS);
+    }
+    async share(matchmakerId, sourceProfileId, targetProfileId) {
+        // Both profiles must belong to the caller — a matchmaker could otherwise
+        // probe someone else's profile IDs by trying to "share" against them.
+        const source = await this.profilesService.findOne(matchmakerId, sourceProfileId);
+        const target = await this.profilesService.findOne(matchmakerId, targetProfileId);
+        const score = this.score(source, target);
+        const match = await this.prisma.match.upsert({
+            where: { sourceProfileId_targetProfileId: { sourceProfileId, targetProfileId } },
+            create: { sourceProfileId, targetProfileId, score, sharedAt: new Date() },
+            update: { sharedAt: new Date(), score },
+        });
+        return {
+            matchId: match.id,
+            status: match.status,
+            shareText: this.buildShareText(target),
+            shareUrl: `https://wa.me/?text=${encodeURIComponent(this.buildShareText(target))}`,
+        };
+    }
+    async updateStatus(matchmakerId, matchId, status) {
+        const match = await this.prisma.match.findUnique({
+            where: { id: matchId },
+            include: { sourceProfile: true },
+        });
+        if (!match)
+            throw new common_1.NotFoundException('Match not found');
+        if (match.sourceProfile.matchmakerId !== matchmakerId) {
+            throw new common_1.ForbiddenException('You do not have access to this match');
+        }
+        return this.prisma.match.update({ where: { id: matchId }, data: { status } });
+    }
+    // Deliberately no photos and no direct contact info here — this is a
+    // teaser sent over WhatsApp, matching the product's "no photos in blind
+    // shares" confidentiality stance. Full details stay inside MatchPro.
+    buildShareText(profile) {
+        const lines = [
+            `New match suggestion: ${profile.name}, ${profile.age} yrs`,
+            profile.city ? `Location: ${profile.city}` : null,
+            profile.education ? `Education: ${profile.education}` : null,
+            profile.profession ? `Profession: ${profile.profession}` : null,
+            `Shared via MatchPro`,
+        ].filter(Boolean);
+        return lines.join('\n');
     }
     // Rule-based two-way scoring: every criterion is checked in both
     // directions (does A fit B's preferences AND does B fit A's) since a

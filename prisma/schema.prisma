@@ -52,6 +52,26 @@ model Profile {
   photos    Photo[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  sentMatches     Match[] @relation("SourceProfile")
+  receivedMatches Match[] @relation("TargetProfile")
+}
+
+model Match {
+  id              String      @id @default(cuid())
+  sourceProfile   Profile     @relation("SourceProfile", fields: [sourceProfileId], references: [id])
+  sourceProfileId String
+  targetProfile   Profile     @relation("TargetProfile", fields: [targetProfileId], references: [id])
+  targetProfileId String
+  score           Int
+  status          MatchStatus @default(SUGGESTED)
+  sharedAt        DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // A given pair is tracked once — sharing the same candidate again updates
+  // the existing row (score, sharedAt) instead of creating a duplicate.
+  @@unique([sourceProfileId, targetProfileId])
 }
 
 model Photo {
@@ -81,3 +101,12 @@ enum Gender {
   MALE
   FEMALE
 }
+
+enum MatchStatus {
+  SUGGESTED
+  INTERESTED
+  MEETING_SCHEDULED
+  REJECTED
+  MARRIED
+}
+

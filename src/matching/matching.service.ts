@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProfilesService } from '../profiles/profiles.service';
+import { MatchStatusDto } from './dto/update-match-status.dto';
 
 const MAX_RESULTS = 50;
 
@@ -26,11 +27,76 @@ export class MatchingService {
       },
     });
 
+    // Pull any matches already acted on for this source profile, so the
+    // list can show "already shared / Interested" instead of recomputing
+    // from scratch every time and losing that state.
+    const existing = await this.prisma.match.findMany({
+      where: { sourceProfileId: profileId, targetProfileId: { in: candidates.map((c) => c.id) } },
+    });
+    const existingByTarget = new Map(existing.map((m) => [m.targetProfileId, m]));
+
     return candidates
-      .map((candidate) => ({ profile: candidate, score: this.score(source, candidate) }))
-      .filter((match) => match.score > 0)
+      .map((candidate) => {
+        const match = existingByTarget.get(candidate.id);
+        return {
+          profile: candidate,
+          score: this.score(source, candidate),
+          matchId: match?.id ?? null,
+          status: match?.status ?? null,
+          sharedAt: match?.sharedAt ?? null,
+        };
+      })
+      .filter((m) => m.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, MAX_RESULTS);
+  }
+
+  async share(matchmakerId: string, sourceProfileId: string, targetProfileId: string) {
+    // Both profiles must belong to the caller — a matchmaker could otherwise
+    // probe someone else's profile IDs by trying to "share" against them.
+    const source = await this.profilesService.findOne(matchmakerId, sourceProfileId);
+    const target = await this.profilesService.findOne(matchmakerId, targetProfileId);
+
+    const score = this.score(source, target);
+    const match = await this.prisma.match.upsert({
+      where: { sourceProfileId_targetProfileId: { sourceProfileId, targetProfileId } },
+      create: { sourceProfileId, targetProfileId, score, sharedAt: new Date() },
+      update: { sharedAt: new Date(), score },
+    });
+
+    return {
+      matchId: match.id,
+      status: match.status,
+      shareText: this.buildShareText(target),
+      shareUrl: `https://wa.me/?text=${encodeURIComponent(this.buildShareText(target))}`,
+    };
+  }
+
+  async updateStatus(matchmakerId: string, matchId: string, status: MatchStatusDto) {
+    const match = await this.prisma.match.findUnique({
+      where: { id: matchId },
+      include: { sourceProfile: true },
+    });
+    if (!match) throw new NotFoundException('Match not found');
+    if (match.sourceProfile.matchmakerId !== matchmakerId) {
+      throw new ForbiddenException('You do not have access to this match');
+    }
+
+    return this.prisma.match.update({ where: { id: matchId }, data: { status } });
+  }
+
+  // Deliberately no photos and no direct contact info here — this is a
+  // teaser sent over WhatsApp, matching the product's "no photos in blind
+  // shares" confidentiality stance. Full details stay inside MatchPro.
+  private buildShareText(profile: any): string {
+    const lines = [
+      `New match suggestion: ${profile.name}, ${profile.age} yrs`,
+      profile.city ? `Location: ${profile.city}` : null,
+      profile.education ? `Education: ${profile.education}` : null,
+      profile.profession ? `Profession: ${profile.profession}` : null,
+      `Shared via MatchPro`,
+    ].filter(Boolean);
+    return lines.join('\n');
   }
 
   // Rule-based two-way scoring: every criterion is checked in both

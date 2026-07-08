@@ -12,42 +12,34 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MatchingController = void 0;
+exports.MatchesController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const current_matchmaker_decorator_1 = require("../common/decorators/current-matchmaker.decorator");
 const matching_service_1 = require("./matching.service");
-let MatchingController = class MatchingController {
+const update_match_status_dto_1 = require("./dto/update-match-status.dto");
+// Separate controller from MatchingController because this operates on a
+// persisted Match by its own id (/matches/:id), not nested under /profiles.
+let MatchesController = class MatchesController {
     constructor(matchingService) {
         this.matchingService = matchingService;
     }
-    findMatches(mm, id) {
-        return this.matchingService.findMatches(mm.id, id);
-    }
-    share(mm, sourceId, targetId) {
-        return this.matchingService.share(mm.id, sourceId, targetId);
+    updateStatus(mm, id, dto) {
+        return this.matchingService.updateStatus(mm.id, id, dto.status);
     }
 };
-exports.MatchingController = MatchingController;
+exports.MatchesController = MatchesController;
 __decorate([
-    (0, common_1.Get)(':id/matches'),
+    (0, common_1.Patch)(':id/status'),
     __param(0, (0, current_matchmaker_decorator_1.CurrentMatchmaker)()),
     __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, update_match_status_dto_1.UpdateMatchStatusDto]),
     __metadata("design:returntype", void 0)
-], MatchingController.prototype, "findMatches", null);
-__decorate([
-    (0, common_1.Post)(':sourceId/matches/:targetId/share'),
-    __param(0, (0, current_matchmaker_decorator_1.CurrentMatchmaker)()),
-    __param(1, (0, common_1.Param)('sourceId')),
-    __param(2, (0, common_1.Param)('targetId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String]),
-    __metadata("design:returntype", void 0)
-], MatchingController.prototype, "share", null);
-exports.MatchingController = MatchingController = __decorate([
+], MatchesController.prototype, "updateStatus", null);
+exports.MatchesController = MatchesController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Controller)('profiles'),
+    (0, common_1.Controller)('matches'),
     __metadata("design:paramtypes", [matching_service_1.MatchingService])
-], MatchingController);
+], MatchesController);
