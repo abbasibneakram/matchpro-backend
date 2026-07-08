@@ -1,12 +1,13 @@
 {
   "name": "matchpro-backend",
   "version": "0.1.0",
-  "scripts": {
+ "scripts": {
     "start:dev": "nest start --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "npm run prisma:deploy && node dist/main",
     "build": "nest build",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
