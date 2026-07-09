@@ -1,13 +1,17 @@
 {
   "name": "matchpro-backend",
   "version": "0.1.0",
+    "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
  "scripts": {
     "start:dev": "nest start --watch",
     "start:prod": "npm run prisma:deploy && node dist/main",
     "build": "nest build",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy"
+    "prisma:deploy": "prisma migrate deploy",
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
@@ -36,6 +40,7 @@
     "@types/multer": "^1.4.11",
     "@types/passport-jwt": "^4.0.1",
     "prisma": "^5.10.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
